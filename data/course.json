@@ -1,0 +1,15 @@
+{
+  "title": "Machine Learning Lab",
+  "subtitle": "Python for machine learning",
+  "storageKey": "s6-ml-lab-v1",
+  "packages": ["numpy", "pandas", "scikit-learn", "scipy"],
+  "modules": [
+    {"id": "stats", "title": "Statistics", "blurb": "Summarize a list of numbers."},
+    {"id": "sentiment", "title": "Text sentiment", "blurb": "Score words, then score a sentence."},
+    {"id": "regression", "title": "Regression", "blurb": "Fit a line, split data, predict."},
+    {"id": "trees", "title": "Decision trees", "blurb": "Encode categories and train a tree."},
+    {"id": "metrics", "title": "Classifier metrics", "blurb": "Measure how often a model is right."},
+    {"id": "logistic", "title": "Logistic regression", "blurb": "Classify with a probability."},
+    {"id": "ai_concepts", "title": "AI in practice", "blurb": "Detection thresholds, overlap and risk."}
+  ]
+}
