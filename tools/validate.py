@@ -74,6 +74,8 @@ def structure(lesson, seen):
                 compile(lesson[field], field, "exec")
             except SyntaxError as exc:
                 errors.append(f"{field} does not parse: {exc}")
+        if not runner.sample_call(lesson):
+            errors.append("no sample call for Run: set 'try' or start the first check with a one-line 'result = ...'")
         for i, check in enumerate(lesson["checks"]):
             if "code" not in check or "label" not in check:
                 errors.append(f"check[{i}] needs label and code")

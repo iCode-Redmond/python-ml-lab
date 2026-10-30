@@ -230,14 +230,37 @@ def run_lesson(lesson, code, datasets=None):
     return result
 
 
+def sample_call(lesson):
+    """Expression Run evaluates after the code. `try` wins, else the first check's call."""
+    if lesson.get("try"):
+        return lesson["try"]
+    for check in lesson.get("checks", []):
+        code = check.get("code", "")
+        if code.startswith("result = ") and "\n" not in code:
+            return code[len("result = "):]
+    return None
+
+
 def run_only(lesson, code, datasets=None):
-    """Run the code and report what it printed. No grading."""
+    """Run the code, then call the lesson function on a sample input. No grading.
+
+    Defining a function prints nothing. Without the sample call, Run would
+    stay silent for code that is only a function.
+    """
     out = io.StringIO()
+    result = {"status": "ok", "stdout": "", "call": None, "value": None}
     try:
         ns = build_namespace(lesson, datasets or {})
         with contextlib.redirect_stdout(out):
             exec(compile(code, USER_FILE, "exec"), ns)
+            expr = sample_call(lesson)
+            if expr and callable(ns.get(lesson.get("function"))):
+                result["call"] = expr
+                value = eval(compile(expr, "<sample>", "eval"), ns)
+                pretty = type(value).__module__.startswith("pandas")
+                result["value"] = str(value) if pretty else show(to_native(value), 400)
     except BaseException as exc:  # noqa: BLE001
         err = describe_error(exc)
-        return {"status": "error", "stdout": out.getvalue(), "error": err, "message": friendly_error(err)}
-    return {"status": "ok", "stdout": out.getvalue()}
+        result.update(status="error", error=err, message=friendly_error(err), call=result["call"])
+    result["stdout"] = out.getvalue()
+    return result

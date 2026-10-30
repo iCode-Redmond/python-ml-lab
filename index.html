@@ -170,7 +170,7 @@ pre.stdout { margin: 0 0 12px; padding: 10px 12px; background: var(--code-bg); b
 
   /* ---------- worker with watchdog ---------- */
   let worker, seq = 0, pending = null, ready = false;
-  const LIMIT_MS = 10000;
+  const LIMIT_MS = 20000;
   function spawn() {
     ready = false;
     setStatus("Loading Python");
@@ -201,7 +201,7 @@ pre.stdout { margin: 0 0 12px; padding: 10px 12px; background: var(--code-bg); b
     return new Promise((resolve) => {
       const id = ++seq;
       pending = { id, resolve, timer: null };
-      const slim = { id: lesson.id, kind: lesson.kind, function: lesson.function, setup: lesson.setup, datasets: lesson.datasets, checks: lesson.checks, pitfalls: lesson.pitfalls };
+      const slim = { id: lesson.id, kind: lesson.kind, function: lesson.function, try: lesson.try, setup: lesson.setup, datasets: lesson.datasets, checks: lesson.checks, pitfalls: lesson.pitfalls };
       worker.postMessage({ type, id, lesson: slim, code, datasets });
     });
   }
@@ -283,12 +283,14 @@ pre.stdout { margin: 0 0 12px; padding: 10px 12px; background: var(--code-bg); b
     const res = await call(kind === "check" ? "check" : "run", l, code);
     $("check").disabled = $("run").disabled = false;
     let h = "";
-    if (res.stdout) h += `<h2>Output</h2><pre class="stdout">${esc(res.stdout)}</pre>`;
+    if (kind === "run" && res.call) h += `<h2>Sample call</h2><pre class="stdout">${esc(res.call)}</pre>`;
+    if (res.stdout) h += `<h2>Printed</h2><pre class="stdout">${esc(res.stdout)}</pre>`;
     if (res.status === "error") {
       h += `<h2>Problem</h2><p class="err">${fmt(res.message || "The code did not run.")}</p>`;
       if (kind === "check") bump(l);
     } else if (kind === "run") {
-      if (!res.stdout) h += '<span class="empty">The code ran with no output. Use print() to show a value, or press Check my work.</span>';
+      if (res.value != null) h += `<h2>Returned</h2><pre class="stdout">${esc(res.value)}</pre>`;
+      else if (!res.stdout) h += '<span class="empty">Nothing ran. Defining a function does not run it. Call it yourself, for example <code>' + esc(l.function || "name") + '(...)</code>, or press Check my work.</span>';
     } else {
       const ok = res.checks.filter((c) => c.passed).length;
       h += `<h2>Checks · ${ok} of ${res.checks.length}</h2>`;

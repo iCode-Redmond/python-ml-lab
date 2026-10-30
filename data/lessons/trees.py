@@ -35,6 +35,7 @@ LESSONS = [
             {"t": "p", "text": "The inputs are Age, Experience, Rank and Nationality. The target is Go. Set `random_state=0` so training is repeatable."},
         ],
         "function": "train_tree",
+        "try": "train_tree(decision)",
         "starter": "from sklearn.tree import DecisionTreeClassifier\n\ndef train_tree(df):\n    # return a trained DecisionTreeClassifier\n    pass\n",
         "solution": "from sklearn.tree import DecisionTreeClassifier\n\ndef train_tree(df):\n    data = prepare(df)\n    cols = ['Age', 'Experience', 'Rank', 'Nationality']\n    tree = DecisionTreeClassifier(random_state=0)\n    tree.fit(data[cols], data['Go'])\n    return tree\n",
         "hints": [
